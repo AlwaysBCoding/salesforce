@@ -232,8 +232,10 @@
   "Executes an arbitrary SOQL query
    i.e SELECT name from Account"
   [query token]
-  (request :get (gen-query-url @+version+ query) token))
+  (let [resp (request :get (gen-query-url @+version+ query) token)
+        next-url (:nextRecordsUrl resp)]
+    (assoc resp
+      :get-next-record #(request :get next-url token))))
 
 (comment
   (soql "SELECT name from Account" auth))
-
