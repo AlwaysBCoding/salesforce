@@ -1,4 +1,4 @@
-(defproject msg/salesforce "1.0.2"
+(defproject msg/salesforce "1.0.3-SNAPSHOT"
   :plugins [[s3-wagon-private "1.1.2"]]
   :description "A clojure library for accessing the salesforce api"
   :url "http://owainlewis.com"
