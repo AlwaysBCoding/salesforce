@@ -228,14 +228,23 @@
         soql (java.net.URLEncoder/encode query "UTF-8")]
     (apply str [url "?q=" soql])))
 
+(defn assoc-get-next-record-fn
+  "Given a response from an SOQL query, assoc in a function
+  to retreive the next record (and recursively do the same upon
+  retreiving the next record. The function is available under
+  the key :get-next-record."
+  [resp token]
+  (assoc resp :get-next-record
+              #(assoc-get-next-record-fn
+                (request :get (:nextRecordsUrl resp) token) token)))
+
 (defn soql
-  "Executes an arbitrary SOQL query
-   i.e SELECT name from Account"
+  "Executes an arbitrary SOQL query i.e SELECT name from Account.
+  In addition to the standard SOQL result, adds in a function
+  under key :get-next-record for recursively retrieving additional pages."
   [query token]
-  (let [resp (request :get (gen-query-url @+version+ query) token)
-        next-url (:nextRecordsUrl resp)]
-    (assoc resp
-      :get-next-record #(request :get next-url token))))
+  (let [resp (request :get (gen-query-url @+version+ query) token)]
+    (assoc-get-next-record-fn resp token)))
 
 (comment
   (soql "SELECT name from Account" auth))
